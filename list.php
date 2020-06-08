@@ -6,6 +6,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
+    <a href = "/index.php" type = "sumit">
+        <input type="button" value="Home page" />
+    </a>   
 <?php
 $servername = "localhost:3306";
 $username = "root";
@@ -61,15 +64,13 @@ $total_records = $row['total'];
         <div class="pagination">
            <?php 
        
-            // nếu current_page > 1 và total_page > 1 mới hiển thị nút prev
             if ($current_page > 1 && $total_page > 1){
                 echo '<a href="/list.php?page='.($current_page-1).'">Prev</a> | ';
             }
  
-            // Lặp khoảng giữa
+           
             for ($i = 1; $i <= $total_page; $i++){
-                // Nếu là trang hiện tại thì hiển thị thẻ span
-                // ngược lại hiển thị thẻ a
+               
                 if ($i == $current_page){
                     echo '<span>'.$i.'</span> | ';
                 }
@@ -78,7 +79,6 @@ $total_records = $row['total'];
                 }
             }
  
-            // nếu current_page < $total_page và total_page > 1 mới hiển thị nút prev
             if ($current_page < $total_page && $total_page > 1){
                 echo '<a href="/list.php?page='.($current_page+1).'">Next</a> | ';
             }

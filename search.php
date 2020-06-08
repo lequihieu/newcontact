@@ -4,7 +4,9 @@
   <title></title>
 </head>
 <body>
-
+    <a href = "/index.php" type = "sumit">
+        <input type="button" value="Home page" />
+    </a><br>
 </body>
 <?php
     $textSearch = $_GET['q'];

@@ -8,5 +8,5 @@
     $sql = 'delete from info where id ='. $id;
     $connection->query($sql);
    // $connection->close();
-    header("location: /list.php");
+    header("location: /index.php");
 ?>
