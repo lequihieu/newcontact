@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Ví dụ phân trang trong PHP và MySQL</title>
+
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
@@ -43,17 +43,6 @@ $total_records = $row['total'];
 
  $result = mysqli_query($connection, "SELECT * FROM info LIMIT $start, $limit");
 
-
-// if($result->num_rows > 0) {
-//     while($row = $result->fetch_assoc()) {
-//         echo "id: " . $row["id"]. " - Name: ". $row["name"] . " - Phone: " . $row["phone"] . " - Email: " . $row["email"];
-//         echo '<a href = "/edit.php?id=' . $row["id"]. '" type="sumit" name="sumit">Update </a>';
-//         echo '<a href = "/delete.php?id=' . $row["id"]. '"type="sumit" name="sumit">Delete </a>' . '<br>';
-//     }
-// } else {
-//     echo "no data";
-// }
-   // $connection->close();
 ?>
         <div>
             <?php 

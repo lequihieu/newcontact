@@ -24,10 +24,15 @@ $statement = $connection->prepare($sql);
         $email = $_POST['email'];
         $statement->bind_param('sss', $name, $phone, $email);
         $statement->execute();
-
+        
+    }
+    if(isset($_POST['searchList'])) {
+      $textSearch = $_POST['textSearch'];
+      header("location: /search.php?q=$textSearch");
     }
     
 ?>
+
 
 <form class="contact-form" method="post">
   <input type="text" name="name" placeholder="Fullname">
@@ -35,7 +40,14 @@ $statement = $connection->prepare($sql);
   <input type="text" name="email" placeholder="Email">
   <button type="sumit" name="sumit">Sumit </button>
 </form>
+
 <a href="http://localhost/list.php">
    <input type="button" value="All users" />
 </a>
+
+<form  method="post">
+    <input type="text" name="textSearch" placeholder="Text Search">
+    <button type="sumit" name="searchList">Search </button>
+</form>
+
 </html>
