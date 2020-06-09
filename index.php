@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <style>
+    .error {color: #FF0000;}
+  </style>
   <title></title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
@@ -9,7 +12,7 @@
 
 <?php
 
-  $connection = new mysqli('localhost:3306', 'root', 'Ridaica123', 'contactdb');
+  $connection = new mysqli('localhost:3306', 'root', 'Ridaica123~', 'contactdb');
   
   if($connection->connect_error) {
     echo 'loi ket noi';
@@ -22,7 +25,15 @@
         $phone = $_POST['phone'];
         $email = $_POST['email'];
         $statement->bind_param('sss', $name, $phone, $email);
-        $statement->execute();     
+        if(empty($name) || empty($phone) || empty($email)) {
+          echo '<script type="text/javascript">alert("Submit failed")</script>'; 
+          $row['name'] = $name;
+          $row['phone'] = $phone;
+          $row['email'] = $email;
+        } else {   
+          $statement->execute();
+          echo '<script type="text/javascript">alert("Submit successful")</script>'; 
+        } 
     } 
   
     if(isset($_POST['deleteById'])) {
@@ -30,7 +41,7 @@
       $sql = 'delete from info where id =' . $id;
       if($connection->query($sql)) {
         echo '<script type="text/javascript">alert("Delete successful")</script>';
-      };
+      } else echo '<script type="text/javascript">alert("Delete failed")</script>';
     }
 
     if(isset($_POST['updateById'])) {
@@ -48,9 +59,70 @@
       $id = $_POST['id'];
 
       $sqlUpdate = "UPDATE contactdb.info set name='" . $name . "', phone='" . $phone . "', email = '" . $email . "' WHERE id = $id";
-      $connection->query($sqlUpdate);
+
+      if(empty($id)) {
+        echo '<script type="text/javascript">alert("Update failed, Please Select element to update  ")</script>'; 
+      } 
+      elseif(empty($name) || empty($phone) || empty($email)) {
+        echo '<script type="text/javascript">alert("Update failed, Please do not leave the text empty  ")</script>'; 
+        $row['name'] = $name;
+        $row['phone'] = $phone;
+        $row['email'] = $email;
+      } else {   
+        $connection->query($sqlUpdate);
+        echo '<script type="text/javascript">alert("Update successful")</script>'; 
+      } 
                  
     }
+
+    if($_SERVER["REQUEST_METHOD"] == "POST") {
+      if (empty($_POST["name"])) {
+        $nameErr = "Name is required";
+      }
+      if (empty($_POST["phone"])) {
+        $phoneErr = "Phone is required";
+      }
+      if (empty($_POST["email"])) {
+        $emailErr = "Name is required";
+      }
+    }
+
+    function getUsers($result) {
+
+      if($result->num_rows > 0) {
+        echo '<table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Name</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Email</th>
+          </tr>
+        </thead>
+        <tbody>';
+
+        while($row = $result->fetch_assoc()) {
+          echo '<tr>
+          <th scope="row">'.$row["id"].'</th>
+          <td>'.$row["name"].'</td>
+          <td>'.$row["phone"].'</td>
+          <td>'.$row["email"].'</td>
+          <td>';
+          echo '<form method="post">';
+          echo '<input type="hidden" name="id" value='.$row["id"] . '>';
+          echo '<input class="btn btn-primary" type="submit" name="updateById" value="Update"'.'onclick="return confirm('."'Want to Update?'".')"> ';
+          echo '<input class="btn btn-primary" type="submit" name="deleteById" value="Delete"'.'onclick="return confirm('."'Want to Delete?'".')">';
+          // onclick="return confirm('Want to Submit?')
+        echo '</form>';
+        echo '</td>
+        </tr>'; 
+        }
+        echo '</tbody>
+        </table>';
+      } else {
+        echo "no data";
+      }
+    }  
 ?>
 <div class="container">
   <div class="row">
@@ -59,12 +131,15 @@
                   <form class="contact-form" method="post">
                       <div class="form-group">
                         <input class="form-control" type="text" name="name" placeholder="Fullname" value = "<?=$row['name']?>" pattern="([A-Za-z\s]{1,30})">
+                        <span class="error">* <?php echo $nameErr?></span>
                       </div>
                       <div class="form-group">
-                        <input class="form-control" type="text" name="phone" placeholder="Phone" value = "<?=$row['phone']?>" pattern="^0(1\d{9}|9\d{8})$">
+                        <input class="form-control" type="number" name="phone" placeholder="Phone" value = "<?=$row['phone']?>" pattern="^0(1\d{9}|9\d{8})$">
+                        <span class="error">* <?php echo $phoneErr?></span>
                       </div>
                       <div class="form-group">
                         <input class="form-control" type="text" name="email" placeholder="Email" value = "<?=$row['email']?>" pattern="^[a-z][a-z0-9_\.]{5,32}@[a-z0-9]{2,}(\.[a-z0-9]{2,4}){1,2}$">
+                        <span class="error">* <?php echo $emailErr?></span>
                       </div>  
                         <input type="hidden" name="id" value = "<?=$idUpdate?>">
                         <button class="btn btn-primary" type="submit" name="submit" onclick="return confirm('Want to Submit?')">Submit </button>
@@ -76,7 +151,7 @@
     <div class="col-9">
                   <div>
                     <form  method="post">
-                      <input class="form-control" type="text" name="textSearch" placeholder="Text Search">
+                      <input class="form-control" type="text" name="textSearch" placeholder="Text Search" value = "<?=$_POST['textSearch']?>">
                       <button class="btn btn-primary" type="submit" name="searchList">Search </button>
                     </form>
                   </div>
@@ -86,40 +161,8 @@
                           if(!isset($_POST['searchList'])) {
                           $getAllUsers = 'SELECT * FROM contactdb.info';
                           $result = mysqli_query($connection, $getAllUsers);
-                          if($result->num_rows > 0) {
-                            echo '<table class="table">
-                            <thead>
-                              <tr>
-                                <th scope="col">Id</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">Phone</th>
-                                <th scope="col">Email</th>
-                              </tr>
-                            </thead>
-                            <tbody>';
-
-                            while($row = $result->fetch_assoc()) {
-                              echo '<tr>
-                              <th scope="row">'.$row["id"].'</th>
-                              <td>'.$row["name"].'</td>
-                              <td>'.$row["phone"].'</td>
-                              <td>'.$row["email"].'</td>
-                              <td>';
-                              echo '<form method="post">';
-                              echo '<input type="hidden" name="id" value='.$row["id"] . '>';
-                              echo '<input class="btn btn-primary" type="submit" name="updateById" value="Update"'.'onclick="return confirm('."'Want to Update?'".')"> ';
-                              echo '<input class="btn btn-primary" type="submit" name="deleteById" value="Delete"'.'onclick="return confirm('."'Want to Delete?'".')">';
-                              // onclick="return confirm('Want to Submit?')
-                            echo '</form>';
-                            echo '</td>
-                            </tr>'; 
-                            }
-                            echo '</tbody>
-                            </table>';
-                          } else {
-                            echo "no data";
-                        }
-                      }
+                          getUsers($result);
+                          }
                       ?>
                   </div>
 
@@ -131,40 +174,7 @@
                           $textSearch = $_POST['textSearch'];
                           $sqlSearch = 'select * from contactdb.info where CONCAT_WS('. "''" . ', name, phone, email) LIKE ' . "'" . "%$textSearch%" . "'";
                           $result = mysqli_query($connection, $sqlSearch);
-                          if($result->num_rows > 0) {
-                            echo '<table class="table">
-                            <thead>
-                              <tr>
-                                <th scope="col">Id</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">Phone</th>
-                                <th scope="col">Email</th>
-                                
-                              </tr>
-                            </thead>
-                            <tbody>';
-
-                            while($row = $result->fetch_assoc()) {
-                                  echo '<tr>
-                                  <th scope="row">'.$row["id"].'</th>
-                                  <td>'.$row["name"].'</td>
-                                  <td>'.$row["phone"].'</td>
-                                  <td>'.$row["email"].'</td>
-                                  <td>';
-                                  echo '<form method="post">';
-                                  echo '<input type="hidden" name="id" value='.$row["id"] . '>';
-                                  echo '<input class="btn btn-primary" type="submit" name="updateById" value="Update"'.'onclick="return confirm('."'Want to Update?'".')"> ';
-                                  echo '<input class="btn btn-primary" type="submit" name="deleteById" value="Delete"'.'onclick="return confirm('."'Want to Delete?'".')">';
-                                  // onclick="return confirm('Want to Submit?')
-                                echo '</form>';
-                                echo '</td>
-                                </tr>'; 
-                            }
-                            echo '</tbody>
-                            </table>';
-                          } else {
-                            echo "no data";
-                          }
+                          getUsers($result);
                         }  
                       ?>
                     </div>
