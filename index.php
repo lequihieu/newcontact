@@ -12,7 +12,7 @@
 
 <?php
 
-  $connection = new mysqli('localhost:3306', 'root', 'Ridaica123~', 'contactdb');
+  $connection = new mysqli('localhost:3306', 'root', 'Ridaica123', 'contactdb');
   
   if($connection->connect_error) {
     echo 'loi ket noi';
@@ -75,7 +75,7 @@
                  
     }
 
-    if($_SERVER["REQUEST_METHOD"] == "POST") {
+    if(($_SERVER["REQUEST_METHOD"] == "POST")&& (empty($_POST["id"] || (isset($_POST['searchList']))))) {
       if (empty($_POST["name"])) {
         $nameErr = "Name is required";
       }
@@ -134,7 +134,7 @@
                         <span class="error">* <?php echo $nameErr?></span>
                       </div>
                       <div class="form-group">
-                        <input class="form-control" type="number" name="phone" placeholder="Phone" value = "<?=$row['phone']?>" pattern="^0(1\d{9}|9\d{8})$">
+                        <input class="form-control" type="text" name="phone" placeholder="Phone" value = "<?=$row['phone']?>" pattern="^0(1\d{9}|9\d{8})$">
                         <span class="error">* <?php echo $phoneErr?></span>
                       </div>
                       <div class="form-group">
