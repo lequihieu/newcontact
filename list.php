@@ -1,3 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+    <a href = "/index.php" type = "sumit">
+        <input type="button" value="Home page" />
+    </a>   
 <?php
 $servername = "localhost:3306";
 $username = "root";
@@ -9,18 +20,69 @@ if($connection->connect_error) {
     die("Connection failed: " . $connection->connect_error);
 }
 
-$sql = 'SELECT id, name, phone, email from info';
-$result = $connection->query($sql);
+$result = mysqli_query($connection, 'select count(id) as total from info');
+$row = mysqli_fetch_assoc($result);
+$total_records = $row['total'];
+
+ 
+ $current_page = isset($_GET['page']) ? $_GET['page'] : 1;
+
+ $limit = 10;
+
+ 
+ $total_page = ceil($total_records / $limit);
+
+ 
+ if ($current_page > $total_page){
+     $current_page = $total_page;
+ }
+ else if ($current_page < 1){
+     $current_page = 1;
+ }
 
 
-if($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
-        echo "id: " . $row["id"]. " - Name: ". $row["name"] . " - Phone: " . $row["phone"] . " - Email: " . $row["email"];
-        echo '<a href = "/edit.php?id=' . $row["id"]. '" type="sumit" name="sumit">Update </a>';
-        echo '<a href = "/delete.php?id=' . $row["id"]. '"type="sumit" name="sumit">Delete </a>' . '<br>';
-    }
-} else {
-    echo "no data";
-}
-   // $connection->close();
+ $start = ($current_page - 1) * $limit;
+
+
+ $result = mysqli_query($connection, "SELECT * FROM info LIMIT $start, $limit");
+
 ?>
+        <div>
+            <?php 
+            
+            if($result->num_rows > 0) {
+                while($row = $result->fetch_assoc()) {
+                    echo "id: " . $row["id"]. " - Name: ". $row["name"] . " - Phone: " . $row["phone"] . " - Email: " . $row["email"];
+                    echo '<a href = "/edit.php?id=' . $row["id"]. '" type="sumit" name="sumit">Update </a>';
+                    echo '<a href = "/delete.php?id=' . $row["id"]. '"type="sumit" name="sumit">Delete </a>' . '<br>';
+                }
+            } else {
+                echo "no data";
+            }
+            ?>
+        </div>
+        <div class="pagination">
+           <?php 
+       
+            if ($current_page > 1 && $total_page > 1){
+                echo '<a href="/list.php?page='.($current_page-1).'">Prev</a> | ';
+            }
+ 
+           
+            for ($i = 1; $i <= $total_page; $i++){
+               
+                if ($i == $current_page){
+                    echo '<span>'.$i.'</span> | ';
+                }
+                else{
+                    echo '<a href="/list.php?page='.$i.'">'.$i.'</a> | ';
+                }
+            }
+ 
+            if ($current_page < $total_page && $total_page > 1){
+                echo '<a href="/list.php?page='.($current_page+1).'">Next</a> | ';
+            }
+           ?>
+        </div>
+</body>
+</html>

@@ -19,7 +19,7 @@ if($connection->connect_error) {
         // $sql = "update contactdb.info set name = '".$name."', phone = '".$phone."', email = '".$email."' where id ='".$id."'";
         $sql = "UPDATE contactdb.info set name='" . $name . "', phone='" . $phone . "', email = '" . $email . "' WHERE id = $id";
         $connection->query($sql);
-        header('location: /list.php');
+        header('location: /index.php');
     }
   $connection->close();
 ?>
